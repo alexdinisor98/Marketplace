@@ -45,7 +45,9 @@ class Producer(Thread):
                 product_quantity = product[1]
                 sleeping = product[2]
                 while product_quantity > 0:
+                    # put the products in the buffer
                     while not self.marketplace.publish(self.id_pr, product[0]):
+                        # try to republish if there is not enough space at first
                         time.sleep(self.republish_wait_time)
                     product_quantity -= 1
                 time.sleep(sleeping)

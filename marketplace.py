@@ -5,7 +5,6 @@ Computer Systems Architecture Course
 Assignment 1
 March 2020
 """
-from threading import Lock
 
 class Marketplace:
     """
@@ -20,19 +19,15 @@ class Marketplace:
         :param queue_size_per_producer: the maximum size of a queue associated with each producer
         """
         self.queue_size_per_producer = queue_size_per_producer
-        self.lock_producer = Lock()
-        self.lock_consumer = Lock()
-
         self.queue = [[]]
-
         self.carts = [[]]
-
         self.producers_id_list = []
 
     def register_producer(self):
         """
         Returns an id for the producer that calls this.
         """
+        # add a list for each new producer
         self.queue.append([])
         prod_id = len(self.queue) - 1
         self.producers_id_list.append(prod_id)
@@ -52,11 +47,13 @@ class Marketplace:
         """
 
         list_producer = self.queue[producer_id]
-        if len(list_producer) < self.queue_size_per_producer:
-            list_producer.append(product)
-            return True
+        # check if there is still space available to insert
+        if len(list_producer) == self.queue_size_per_producer:
+            return False
 
-        return False
+        # insert the product in the corresponding producer list
+        list_producer.append(product)
+        return True
 
     def new_cart(self):
         """
@@ -64,6 +61,7 @@ class Marketplace:
 
         :returns an int representing the cart_id
         """
+        # add a new list for each new cart of a consumer
         self.carts.append([])
         return len(self.carts) - 1
 
@@ -83,7 +81,9 @@ class Marketplace:
         for i in range(0, len(self.queue)):
             current_list_in_queue = self.queue[i]
             if product in current_list_in_queue:
+                # adding the product to the consumer's cart
                 self.carts[cart_id].append(product)
+                # now it is unavailable for other consumers
                 self.queue[i].remove(product)
                 return True
 
@@ -101,9 +101,14 @@ class Marketplace:
         """
 
         if product in self.carts[cart_id]:
+            # remove product from the corresponding cart
             self.carts[cart_id].remove(product)
             for p_id in self.producers_id_list:
-                if len(self.queue[p_id]) < self.queue_size_per_producer:
+                if len(self.queue[p_id]) == self.queue_size_per_producer:
+                    continue
+                else:
+                    # add it back to queue so as to be
+                    # available again for other consumers
                     self.queue[p_id].append(product)
                     break
 
@@ -115,4 +120,5 @@ class Marketplace:
         :param cart_id: id cart
 
         """
+        # the list from the specified cart_id
         return self.carts[cart_id]

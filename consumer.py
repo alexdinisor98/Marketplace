@@ -44,18 +44,20 @@ class Consumer(Thread):
                 if elem["type"] == "add":
                     nr_crt = 0
                     while nr_crt < elem["quantity"]:
+                        # add to cart product of quantity size
                         res = self.marketplace.add_to_cart(self.id_cart, elem["product"])
                         if not res:
+                            # retry if product not found in queue to add in cart
                             time.sleep(self.retry_wait_time)
                             continue
                         else:
                             nr_crt = nr_crt + 1
 
                 if elem["type"] == "remove":
-                    quantity_elem = elem["quantity"]
-                    while quantity_elem > 0:
+                    for i in range(0, elem["quantity"]):
+                        # remove products of quantity size
                         self.marketplace.remove_from_cart(self.id_cart, elem["product"])
-                        quantity_elem -= 1
 
+        # display in output the products in the cart
         for product in self.marketplace.place_order(self.id_cart):
             print("%s bought %s" % (self.kwargs["name"], product))
