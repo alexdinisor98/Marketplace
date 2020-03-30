@@ -5,7 +5,7 @@ Computer Systems Architecture Course
 Assignment 1
 March 2020
 """
-from threading import Lock, Semaphore
+from threading import Lock
 
 class Marketplace:
     """
@@ -55,8 +55,8 @@ class Marketplace:
         if len(list_producer) < self.queue_size_per_producer:
             list_producer.append(product)
             return True
-        else:
-            return False
+
+        return False
 
     def new_cart(self):
         """
